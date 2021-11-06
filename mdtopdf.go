@@ -28,7 +28,7 @@ import (
 	"strings"
 
 	"github.com/jung-kurt/gofpdf"
-	bf "gopkg.in/russross/blackfriday.v2"
+	bf "github.com/russross/blackfriday/v2"
 )
 
 // Color is a RGB set of ints; for a nice picker
@@ -118,6 +118,48 @@ func NewPdfRenderer(orient, papersz, pdfFile, tracerFile string) *PdfRenderer {
 
 	r.fontdir = "."
 
+	r.initStylers("Arial", 1.0)
+
+	r.Pdf = gofpdf.New(r.orientation, r.units, r.papersize, r.fontdir)
+	r.Pdf.AddPage()
+	// set default font
+	r.setStyler(r.Normal)
+	r.mleft, r.mtop, r.mright, r.mbottom = r.Pdf.GetMargins()
+	r.em = r.Pdf.GetStringWidth("m")
+	r.IndentValue = 3 * r.em
+
+	//r.current = r.normal // set default
+	r.cs = states{stack: make([]*containerState, 0)}
+	initcurrent := &containerState{containerType: bf.Paragraph,
+		listkind:  notlist,
+		textStyle: r.Normal, leftMargin: r.mleft}
+	r.cs.push(initcurrent)
+	return r
+}
+
+// UsePdfRenderer inits a PdfRenderer object with an existing gofpdf renderer.
+func UsePdfRenderer(pdf *gofpdf.Fpdf, font string, zoom float64) *PdfRenderer {
+	r := new(PdfRenderer)
+	r.initStylers(font, zoom)
+
+	r.Pdf = pdf
+
+	// set default font
+	r.setStyler(r.Normal)
+	r.mleft, r.mtop, r.mright, r.mbottom = r.Pdf.GetMargins()
+	r.em = r.Pdf.GetStringWidth("m")
+	r.IndentValue = 3 * r.em
+
+	//r.current = r.normal // set default
+	r.cs = states{stack: make([]*containerState, 0)}
+	initcurrent := &containerState{containerType: bf.Paragraph,
+		listkind:  notlist,
+		textStyle: r.Normal, leftMargin: r.mleft}
+	r.cs.push(initcurrent)
+	return r
+}
+
+func (r *PdfRenderer) initStylers(font string, zoom float64) {
 	// Normal Text
 	r.Normal = Styler{Font: "Arial", Style: "", Size: 12, Spacing: 2,
 		TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
@@ -156,22 +198,6 @@ func NewPdfRenderer(orient, papersz, pdfFile, tracerFile string) *PdfRenderer {
 	// Table Body Text
 	r.TBody = Styler{Font: "Arial", Style: "", Size: 12, Spacing: 2,
 		TextColor: Color{0, 0, 0}, FillColor: Color{240, 240, 240}}
-
-	r.Pdf = gofpdf.New(r.orientation, r.units, r.papersize, r.fontdir)
-	r.Pdf.AddPage()
-	// set default font
-	r.setStyler(r.Normal)
-	r.mleft, r.mtop, r.mright, r.mbottom = r.Pdf.GetMargins()
-	r.em = r.Pdf.GetStringWidth("m")
-	r.IndentValue = 3 * r.em
-
-	//r.current = r.normal // set default
-	r.cs = states{stack: make([]*containerState, 0)}
-	initcurrent := &containerState{containerType: bf.Paragraph,
-		listkind:  notlist,
-		textStyle: r.Normal, leftMargin: r.mleft}
-	r.cs.push(initcurrent)
-	return r
 }
 
 // Process takes the markdown content, parses it to generate the PDF
