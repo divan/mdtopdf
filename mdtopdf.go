@@ -200,6 +200,13 @@ func (r *PdfRenderer) initStylers(font string, zoom float64) {
 		TextColor: Color{0, 0, 0}, FillColor: Color{240, 240, 240}}
 }
 
+func (r *PdfRenderer) Convert(s string) {
+	// Preprocess content by changing all CRLF to LF
+	s = strings.Replace(s, "\r\n", "\n", -1)
+
+	bf.Run([]byte(s), bf.WithRenderer(r))
+}
+
 // Process takes the markdown content, parses it to generate the PDF
 func (r *PdfRenderer) Process(content []byte) error {
 
@@ -216,12 +223,7 @@ func (r *PdfRenderer) Process(content []byte) error {
 		defer r.w.Flush()
 	}
 
-	// Preprocess content by changing all CRLF to LF
-	s := string(content)
-	s = strings.Replace(s, "\r\n", "\n", -1)
-
-	content = []byte(s)
-	_ = bf.Run(content, bf.WithRenderer(r))
+	r.Convert(string(content))
 
 	err = r.Pdf.OutputFileAndClose(r.pdfFile)
 	if err != nil {
