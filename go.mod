@@ -2,6 +2,8 @@ module github.com/divan/mdtopdf
 
 go 1.16
 
+replace github.com/jung-kurt/gofpdf => ../../../github.com/jung-kurt/gofpdf
+
 require (
 	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/mandolyte/mdtopdf v0.0.0-20201204141826-8d22b5d4e7e3

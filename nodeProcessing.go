@@ -109,11 +109,9 @@ func (r *PdfRenderer) processList(node *bf.Node, entering bool) {
 		*/
 		r.cs.push(x)
 	} else {
-		r.tracer(fmt.Sprintf("%v List (leaving)", kind),
-			fmt.Sprintf("%v", node.ListData))
+		r.tracer(fmt.Sprintf("%v List (leaving)", kind), fmt.Sprintf("%v", node.ListData))
 		r.Pdf.SetLeftMargin(r.cs.peek().leftMargin - r.IndentValue)
-		r.tracer("... Reset List Left Margin",
-			fmt.Sprintf("re-set to %v", r.cs.peek().leftMargin-r.IndentValue))
+		r.tracer("... Reset List Left Margin", fmt.Sprintf("re-set to %v", r.cs.peek().leftMargin-r.IndentValue))
 		r.cs.pop()
 		if len(r.cs.stack) < 2 {
 			r.cr()
@@ -123,12 +121,10 @@ func (r *PdfRenderer) processList(node *bf.Node, entering bool) {
 
 func (r *PdfRenderer) processItem(node *bf.Node, entering bool) {
 	if entering {
-		r.tracer(fmt.Sprintf("%v Item (entering) #%v",
-			r.cs.peek().listkind, r.cs.peek().itemNumber+1),
-			fmt.Sprintf("%v", node.ListData))
 		r.cr() // newline before getting started
 		x := &containerState{containerType: bf.Item,
-			textStyle: r.Normal, itemNumber: r.cs.peek().itemNumber + 1,
+			textStyle:      r.Normal,
+			itemNumber:     r.cs.peek().itemNumber + 1,
 			listkind:       r.cs.peek().listkind,
 			firstParagraph: true,
 			leftMargin:     r.cs.peek().leftMargin}
@@ -136,22 +132,19 @@ func (r *PdfRenderer) processItem(node *bf.Node, entering bool) {
 		// text/paragraphs in the item
 		r.cs.push(x)
 		if r.cs.peek().listkind == unordered {
-			r.Pdf.CellFormat(3*r.em, r.Normal.Size+r.Normal.Spacing,
+			r.Pdf.CellFormat(1*r.em, r.Normal.Size*r.Normal.Spacing*r.zoom,
 				"-",
-				"", 0, "RB", false, 0, "")
+				"", 0, "RM", false, 0, "")
 		} else if r.cs.peek().listkind == ordered {
-			r.Pdf.CellFormat(3*r.em, r.Normal.Size+r.Normal.Spacing,
+			r.Pdf.CellFormat(1*r.em, r.Normal.Size*r.Normal.Spacing*r.zoom,
 				fmt.Sprintf("%v.", r.cs.peek().itemNumber),
-				"", 0, "RB", false, 0, "")
+				"", 0, "RM", false, 0, "")
 		}
 		// with the bullet done, now set the left margin for the text
-		r.Pdf.SetLeftMargin(r.cs.peek().leftMargin + (4 * r.em))
+		//r.Pdf.SetLeftMargin(r.cs.peek().leftMargin + (1 * r.em))
 		// set the cursor to this point
-		r.Pdf.SetX(r.cs.peek().leftMargin + (4 * r.em))
+		//r.Pdf.SetX(r.cs.peek().leftMargin + (1 * r.em))
 	} else {
-		r.tracer(fmt.Sprintf("%v Item (leaving)",
-			r.cs.peek().listkind),
-			fmt.Sprintf("%v", node.ListData))
 		// before we output the new line, reset left margin
 		r.Pdf.SetLeftMargin(r.cs.peek().leftMargin)
 		//r.cr()
@@ -249,7 +242,6 @@ func (r *PdfRenderer) processParagraph(node *bf.Node, entering bool) {
 			return
 		}
 		r.cr()
-		//r.cr()
 	} else {
 		r.tracer("Paragraph (leaving)", "")
 		lm, tm, rm, bm := r.Pdf.GetMargins()
@@ -367,7 +359,7 @@ func (r *PdfRenderer) processHTMLBlock(node *bf.Node) {
 	r.cr()
 	r.setStyler(r.Backtick)
 	r.Pdf.CellFormat(0, r.Backtick.Size,
-		string(node.Literal), "", 1, "LT", true, 0, "")
+		string(node.Literal), "", 0, "LT", true, 0, "")
 	r.cr()
 }
 

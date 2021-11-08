@@ -58,6 +58,7 @@ type PdfRenderer struct {
 	Pdf                *gofpdf.Fpdf
 	orientation, units string
 	papersize, fontdir string
+	zoom               float64
 
 	// trace/log file if present
 	pdfFile, tracerFile string
@@ -126,7 +127,7 @@ func NewPdfRenderer(orient, papersz, pdfFile, tracerFile string) *PdfRenderer {
 	r.setStyler(r.Normal)
 	r.mleft, r.mtop, r.mright, r.mbottom = r.Pdf.GetMargins()
 	r.em = r.Pdf.GetStringWidth("m")
-	r.IndentValue = 3 * r.em
+	r.IndentValue = 1 * r.em
 
 	//r.current = r.normal // set default
 	r.cs = states{stack: make([]*containerState, 0)}
@@ -142,65 +143,69 @@ func UsePdfRenderer(pdf *gofpdf.Fpdf, font string, zoom float64) *PdfRenderer {
 	r := new(PdfRenderer)
 	r.initStylers(font, zoom)
 
+	r.zoom = zoom
+
 	r.Pdf = pdf
 
 	// set default font
 	r.setStyler(r.Normal)
 	r.mleft, r.mtop, r.mright, r.mbottom = r.Pdf.GetMargins()
 	r.em = r.Pdf.GetStringWidth("m")
-	r.IndentValue = 3 * r.em
+	r.IndentValue = 1 * r.em
 
 	//r.current = r.normal // set default
 	r.cs = states{stack: make([]*containerState, 0)}
 	initcurrent := &containerState{containerType: bf.Paragraph,
-		listkind:  notlist,
-		textStyle: r.Normal, leftMargin: r.mleft}
+		listkind:   notlist,
+		textStyle:  r.Normal,
+		leftMargin: r.mleft}
 	r.cs.push(initcurrent)
 	return r
 }
 
 func (r *PdfRenderer) initStylers(font string, zoom float64) {
+	spacing := 0.2
 	// Normal Text
-	r.Normal = Styler{Font: "Arial", Style: "", Size: 12, Spacing: 2,
+	r.Normal = Styler{Font: font, Style: "", Size: 12 * zoom, Spacing: 0.75,
 		TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
 
 	// Link text
-	r.Link = Styler{Font: "Arial", Style: "iu", Size: 12, Spacing: 2,
+	r.Link = Styler{Font: font, Style: "iu", Size: 10 * zoom, Spacing: 0.5,
 		TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
 
 	// Backticked text
-	r.Backtick = Styler{Font: "Courier", Style: "", Size: 12, Spacing: 2,
+	r.Backtick = Styler{Font: font, Style: "", Size: 12 * zoom, Spacing: spacing,
 		TextColor: Color{37, 27, 14}, FillColor: Color{200, 200, 200}}
 
 	// Headings
-	r.H1 = Styler{Font: "Arial", Style: "b", Size: 24, Spacing: 5,
-		TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
-	r.H2 = Styler{Font: "Arial", Style: "b", Size: 22, Spacing: 5,
-		TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
-	r.H3 = Styler{Font: "Arial", Style: "b", Size: 20, Spacing: 5,
-		TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
-	r.H4 = Styler{Font: "Arial", Style: "b", Size: 18, Spacing: 5,
-		TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
-	r.H5 = Styler{Font: "Arial", Style: "b", Size: 16, Spacing: 5,
-		TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
-	r.H6 = Styler{Font: "Arial", Style: "b", Size: 14, Spacing: 5,
-		TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
+	r.H1 = Styler{Font: font, Style: "b", Size: 15 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
+	r.H2 = Styler{Font: font, Style: "b", Size: 14 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
+	r.H3 = Styler{Font: font, Style: "b", Size: 13 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
+	r.H4 = Styler{Font: font, Style: "b", Size: 12 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
+	r.H5 = Styler{Font: font, Style: "b", Size: 11 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
+	r.H6 = Styler{Font: font, Style: "b", Size: 10 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
 
 	//r.inBlockquote = false
 	//r.inHeading = false
-	r.Blockquote = Styler{Font: "Arial", Style: "i", Size: 12, Spacing: 2,
+	r.Blockquote = Styler{Font: font, Style: "i", Size: 12 * zoom, Spacing: spacing,
 		TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
 
 	// Table Header Text
-	r.THeader = Styler{Font: "Arial", Style: "B", Size: 12, Spacing: 2,
+	r.THeader = Styler{Font: font, Style: "B", Size: 12 * zoom, Spacing: spacing,
 		TextColor: Color{0, 0, 0}, FillColor: Color{180, 180, 180}}
 
 	// Table Body Text
-	r.TBody = Styler{Font: "Arial", Style: "", Size: 12, Spacing: 2,
+	r.TBody = Styler{Font: font, Style: "", Size: 12 * zoom, Spacing: spacing,
 		TextColor: Color{0, 0, 0}, FillColor: Color{240, 240, 240}}
 }
 
 func (r *PdfRenderer) Convert(s string) {
+	// enable for tracer
+	/*
+		r.w = bufio.NewWriter(os.Stdout)
+		defer r.w.Flush()
+	*/
+
 	// Preprocess content by changing all CRLF to LF
 	s = strings.Replace(s, "\r\n", "\n", -1)
 
@@ -239,7 +244,7 @@ func (r *PdfRenderer) setStyler(s Styler) {
 }
 
 func (r *PdfRenderer) write(s Styler, t string) {
-	r.Pdf.Write(s.Size+s.Spacing, t)
+	r.Pdf.Write(s.Size*s.Spacing*r.zoom, t)
 }
 
 func (r *PdfRenderer) multiCell(s Styler, t string) {
@@ -334,15 +339,15 @@ func (r *PdfRenderer) RenderFooter(w io.Writer, ast *bf.Node) {
 }
 
 func (r *PdfRenderer) cr() {
-	LH := r.cs.peek().textStyle.Size + r.cs.peek().textStyle.Spacing
+	LH := r.cs.peek().textStyle.Size * r.cs.peek().textStyle.Spacing * r.zoom
 	r.tracer("cr()", fmt.Sprintf("LH=%v", LH))
-	r.write(r.cs.peek().textStyle, "\n")
-	//r.Pdf.Ln(-1)
+	//r.write(r.cs.peek().textStyle, "\n")
+	r.Pdf.Ln(LH)
 }
 
 // Tracer traces parse and pdf generation activity.
 func (r *PdfRenderer) tracer(source, msg string) {
-	if r.tracerFile != "" {
+	if r.w != nil {
 		indent := strings.Repeat("-", len(r.cs.stack)-1)
 		r.w.WriteString(fmt.Sprintf("%v[%v] %v\n", indent, source, msg))
 	}
