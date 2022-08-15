@@ -177,10 +177,13 @@ func (r *PdfRenderer) processStrong(node *bf.Node, entering bool) {
 
 func (r *PdfRenderer) processLink(node *bf.Node, entering bool) {
 	if entering {
-		x := &containerState{containerType: bf.Link,
-			textStyle: r.Link, listkind: notlist,
-			leftMargin:  r.cs.peek().leftMargin,
-			destination: string(node.LinkData.Destination)}
+		x := &containerState{
+			containerType: bf.Link,
+			textStyle:     r.Link,
+			listkind:      notlist,
+			leftMargin:    r.cs.peek().leftMargin,
+			destination:   string(node.LinkData.Destination),
+		}
 		r.cs.push(x)
 		r.tracer("Link (entering)",
 			fmt.Sprintf("Destination[%v] Title[%v]",
@@ -358,8 +361,8 @@ func (r *PdfRenderer) processHTMLBlock(node *bf.Node) {
 	r.tracer("HTMLBlock", string(node.Literal))
 	r.cr()
 	r.setStyler(r.Backtick)
-	r.Pdf.CellFormat(0, r.Backtick.Size,
-		string(node.Literal), "", 0, "LT", true, 0, "")
+	r.Pdf.CellFormat(0, r.Backtick.Size*r.Backtick.Spacing*r.zoom,
+		string(node.Literal), "", 1, "LT", true, 0, "")
 	r.cr()
 }
 
