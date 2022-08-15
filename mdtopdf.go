@@ -178,12 +178,13 @@ func (r *PdfRenderer) initStylers(font string, zoom float64) {
 		TextColor: Color{37, 27, 14}, FillColor: Color{200, 200, 200}}
 
 	// Headings
-	r.H1 = Styler{Font: font, Style: "b", Size: 18 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
-	r.H2 = Styler{Font: font, Style: "b", Size: 17 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
-	r.H3 = Styler{Font: font, Style: "b", Size: 16 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
-	r.H4 = Styler{Font: font, Style: "b", Size: 15 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
-	r.H5 = Styler{Font: font, Style: "b", Size: 14 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
-	r.H6 = Styler{Font: font, Style: "b", Size: 13 * zoom, Spacing: spacing, TextColor: Color{0, 0, 0}, FillColor: Color{255, 255, 255}}
+	hc := Color{30, 30, 30}
+	r.H1 = Styler{Font: font, Style: "b", Size: 18 * zoom, Spacing: spacing, TextColor: hc, FillColor: Color{255, 255, 255}}
+	r.H2 = Styler{Font: font, Style: "b", Size: 17 * zoom, Spacing: spacing, TextColor: hc, FillColor: Color{255, 255, 255}}
+	r.H3 = Styler{Font: font, Style: "b", Size: 16 * zoom, Spacing: spacing, TextColor: hc, FillColor: Color{255, 255, 255}}
+	r.H4 = Styler{Font: font, Style: "b", Size: 15 * zoom, Spacing: spacing, TextColor: hc, FillColor: Color{255, 255, 255}}
+	r.H5 = Styler{Font: font, Style: "b", Size: 14 * zoom, Spacing: spacing, TextColor: hc, FillColor: Color{255, 255, 255}}
+	r.H6 = Styler{Font: font, Style: "b", Size: 13 * zoom, Spacing: spacing, TextColor: hc, FillColor: Color{255, 255, 255}}
 
 	//r.inBlockquote = false
 	//r.inHeading = false

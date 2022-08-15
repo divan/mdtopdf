@@ -288,7 +288,7 @@ func (r *PdfRenderer) processBlockQuote(node *bf.Node, entering bool) {
 func (r *PdfRenderer) processHeading(node *bf.Node, entering bool) {
 	if entering {
 		r.cr()
-		//r.inHeading = true
+		// r.inHeading = true
 		switch node.HeadingData.Level {
 		case 1:
 			r.tracer("Heading (1, entering)", fmt.Sprintf("%v", node.HeadingData))
