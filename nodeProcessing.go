@@ -38,7 +38,7 @@ func (r *PdfRenderer) processText(node *bf.Node) {
 	if r.cs.peek().containerType == bf.Link {
 		r.writeLink(currentStyle, s, r.cs.peek().destination)
 	} else if r.cs.peek().containerType == bf.Heading {
-		//r.cr() // add space before heading
+		// r.cr() // add space before heading
 		r.write(currentStyle, s)
 	} else if r.cs.peek().containerType == bf.TableCell {
 		if r.cs.peek().isHeader {
